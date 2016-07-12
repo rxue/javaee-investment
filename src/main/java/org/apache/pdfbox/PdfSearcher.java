@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -43,11 +45,13 @@ public class PdfSearcher {
 	 * @param keyword
 	 * @return
 	 */
-	public static List<String> searchLines(String filePath, String keyword) {
+	public static List<String> searchLines(String filePath, String regex) {
 		buildContentArray(filePath);
 		List<String> foundLines = new ArrayList<String>();
+		Pattern pattern = Pattern.compile(regex);
 		for (String line : contentArray) {
-			if (line.contains(keyword)) foundLines.add(line);
+			Matcher matcher = pattern.matcher(line);
+			if (matcher.matches()) foundLines.add(line);
 		}
 		return foundLines;
  	}
