@@ -1,10 +1,8 @@
 package org.apache.pdfbox;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +21,7 @@ public class PdfSearcher {
 	 * @return
 	 */
 	public static byte[] downloadBytes(URL url) {
-		int len = 0;//limit is 2GB
+		int len = 0;//limit: maximum of int, i.e. 2GB
 		byte[] content = null;
 		InputStream inputStream = null;
 		BufferedInputStream bufferedInputStream = null;
