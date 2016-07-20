@@ -40,13 +40,14 @@ public class FinancialStatementItemCompositeKeyWritable implements
 	}
 	
 	/**
-	 * Mainly for testing purpose
+	 * for unit test purpose (JUNIT + MRUNIT)
 	 * @param o
 	 * @return
 	 */
 	@Override
 	public boolean equals(Object o) {
-		FinancialStatementItemCompositeKeyWritable compared = (FinancialStatementItemCompositeKeyWritable) o;
+		FinancialStatementItemCompositeKeyWritable compared = 
+				(FinancialStatementItemCompositeKeyWritable) o;
 		return this.financiaStatementlItem.equals(compared.getFinancialStatementItem()) &&
 				this.period == compared.getPeriod();
 	}
