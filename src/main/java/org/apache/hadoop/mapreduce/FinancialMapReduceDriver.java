@@ -3,8 +3,9 @@ package org.apache.hadoop.mapreduce;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FinancialStatementItemCompositeKeyWritable;
-import org.apache.hadoop.io.Text;
+//import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -28,6 +29,8 @@ public class FinancialMapReduceDriver extends Configured implements Tool {
 	      job.setMapperClass(FinancialMapper.class);
 	      job.setReducerClass(FinancialReducer.class);
 	      job.setInputFormatClass(NLineInputFormat.class);//
+	      job.setMapOutputKeyClass(FinancialStatementItemCompositeKeyWritable.class);
+	      job.setMapOutputValueClass(DoubleWritable.class);
 	      job.setOutputKeyClass(FinancialStatementItemCompositeKeyWritable.class);
 	      //job.setOutputValueClass(Text.class);
 
