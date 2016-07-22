@@ -39,9 +39,10 @@ public class FinancialMapper extends Mapper<LongWritable, Text, FinancialStateme
 		}
 		int year = financialRecord.getYear();
 		double totalAssets = financialRecord.getTotalAssets();
-		context.write(new FinancialStatementItemCompositeKeyWritable("Total Assets", year), 
+		context.write(new FinancialStatementItemCompositeKeyWritable(company.toString(), "Total Assets", year), 
 				new DoubleWritable(totalAssets));
 		double equity = financialRecord.getEquity();
-		context.write(new FinancialStatementItemCompositeKeyWritable("Equity", year), new DoubleWritable(equity));
+		context.write(new FinancialStatementItemCompositeKeyWritable(company.toString(), "Equity", year), 
+				new DoubleWritable(equity));
 	}
 }

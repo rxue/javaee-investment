@@ -19,8 +19,10 @@ public class FinancialStatementItemKeySortComparator extends WritableComparator 
 	public int compare(WritableComparable w1, WritableComparable w2) {
 		FinancialStatementItemCompositeKeyWritable key1 = (FinancialStatementItemCompositeKeyWritable) w1;
 		FinancialStatementItemCompositeKeyWritable key2 = (FinancialStatementItemCompositeKeyWritable) w2;
-		return
-		key1.getFinancialStatementItem().compareTo(key2.getFinancialStatementItem()) == 0 ?
-				key1.getPeriod() - key2.getPeriod() : key1.getFinancialStatementItem().compareTo(key2.getFinancialStatementItem());
+		if (! key1.getCompanyName().equals(key2.getCompanyName())) 
+			return key1.getCompanyName().compareTo(key2.getCompanyName());
+		else if (! key1.getFinancialStatementItem().equals(key2.getFinancialStatementItem()))
+			return key1.getFinancialStatementItem().compareTo(key2.getFinancialStatementItem());
+		return key1.getPeriod() - key2.getPeriod(); 
 	}	
 }
