@@ -15,6 +15,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import org.json.JSONArray;
 
 public class PdfProcessor implements Closeable {
 	private byte[] inMemoryByteContent;
@@ -131,6 +132,18 @@ public class PdfProcessor implements Closeable {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * @param tableContent
+	 * @param startIndex
+	 * @param headerLines - how many lines belong to the header
+	 * @return
+	 */
+	protected JSONArray getTableHeader(List<TextPosition> tableContent, int startIndex, int headerLines) {
+		JSONArray array = null;
+		
+		return array;
+	}
 	
 	
 	public int searchLine(String keywordLine) {
