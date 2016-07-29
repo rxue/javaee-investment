@@ -1,4 +1,4 @@
-package org.apache.pdfbox;
+package org.apache.pdfbox.text;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -58,11 +58,12 @@ public class TestPdfSearcher {
 	
 	@Test
 	public void testSearchLines() {
-		List<String> result = PdfSearcher.searchLines(sampleUrl, "Total assets [0-9,]+? [0-9,]+? [0-9,]+? [0-9,]+? [0-9,]+?");
+		List<String> result = PdfSearcher.searchLines(sampleUrl, "Total assets [0-9,]+? [0-9,]+?.*+");
 		assertTrue(!result.isEmpty());
 		assertEquals(result.get(result.size()-1), "Total assets 152,872 140,426 132,330 125,690 113,693");	
-		result = PdfSearcher.searchLines(sampleUrl, "Equity [0-9,]+? [0-9,]+? [0-9,]+? [0-9,]+? [0-9,]+?");
+		result = PdfSearcher.searchLines(sampleUrl, "Equity [0-9,]+? [0-9,]+?.*+");
 		assertTrue(!result.isEmpty());
 		assertEquals(result.get(result.size()-1), "Equity 39,613 38,820 36,638 26,713 19,077");
+		result = PdfSearcher.searchLines(sampleUrl, "Equity attributable to shareholders of E.ON SE");
 	}
 }
