@@ -15,7 +15,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import org.json.JSONArray;
 
 public class PdfProcessor implements Closeable {
 	private byte[] inMemoryByteContent;
@@ -60,32 +59,9 @@ public class PdfProcessor implements Closeable {
 		return pageTree.iterator();
 	}
 	/**
-	 * Search for a keyword or regular expression page by page
-	 * 
-	 * @param keyword
-	 * @return page number, on which contains the keyword or regular expression
-	 */
-	public List<Integer> searchPage(String keyword) {
-		List<Integer> pageNumbers = new ArrayList<Integer>();
-        try {
-			int pages = this.pdDocument.getNumberOfPages();
-			for (int pageNumber = 1; pageNumber < pages; pageNumber ++) {
-				PDFTextStripper stripper = new PDFTextStripper();
-				stripper.setStartPage(pageNumber);
-				stripper.setEndPage(pageNumber);
-				String content = stripper.getText(this.pdDocument);
-				if (content.contains(keyword)) pageNumbers.add(pageNumber);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        return pageNumbers;
-	}
-	/**
 	 * 
 	 * @param lineKeyword - keyword, which can determine a unique line
-	 * @param pages
+	 * @param pages - iterator of pages
 	 * @return
 	 * @throws IOException
 	 */
@@ -103,33 +79,63 @@ public class PdfProcessor implements Closeable {
 		}
 		return null;
 	}
-	
 	/**
 	 * 
 	 * @param lineKeyword
 	 * @param textPositionLists
-	 * @param index - the index of the returned List of TextPosition objects, starting from which is the table content
+	 * @param columns
+	 * @param lastLine
+	 * @param includeLast
 	 * @return
 	 */
-	protected List<TextPosition> getTextPositionList(String lineKeyword, List<List<TextPosition>> textPositionLists, int[] index) {
-		for (List<TextPosition> current : textPositionLists) {
-			int prob = 0;
-			for (int i = 0; i < current.size(); i++) {
-				if (prob == 0 && lineKeyword.charAt(prob) == current.get(i).toString().charAt(0))
-					prob++;
-				else if (lineKeyword.charAt(prob) == current.get(i).toString().charAt(0)) {
-					if (++prob == lineKeyword.length()) {
-						index[0] = i+1;
-						return current;
+	protected List<List<GroupedLineTextPosition>> getTableTextPositionList(String lineKeyword, 
+			List<List<TextPosition>> textPositionLists, String lastLine) {
+		List<List<GroupedLineTextPosition>> tableResult = new ArrayList<List<GroupedLineTextPosition>>();
+		GroupedLineTextPosition currentGroupedText = null;
+		List<GroupedLineTextPosition> currentLine = null;
+		boolean toLastRow = false;
+		for (List<TextPosition> currentList : textPositionLists) {
+			int keywordIndex = 0;
+			boolean keywordDetected = false;
+			TextPosition previous = null;
+			for (TextPosition current : currentList) {
+				if (!keywordDetected) {
+					if (keywordIndex == 0 && 
+							lineKeyword.charAt(keywordIndex) == current.toString().charAt(0)) {
+						keywordIndex++;
+					}
+					else if (lineKeyword.charAt(keywordIndex) == current.toString().charAt(0)) {
+						if (++keywordIndex == lineKeyword.length()) {
+							keywordDetected = true;
+							previous = current;
+						}
+					}
+					else if (lineKeyword.charAt(keywordIndex) != current.toString().charAt(0)) {
+						keywordIndex = 0;
 					}
 				}
-				else if (lineKeyword.charAt(prob) != current.get(i).toString().charAt(0)) {
-					prob = 0;
-				}
-				
+				//Detected keyword, process the text in the table
+				else if (keywordDetected) {
+					if (previous.getY() < current.getY()) {
+						if (toLastRow) return tableResult;
+						currentLine = new ArrayList<GroupedLineTextPosition>();
+						tableResult.add(currentLine);
+					}
+					if (previous.getY() < current.getY() 
+							|| current.getX() - previous.getX() > 2*previous.getWidth())
+					{
+						currentGroupedText = new GroupedLineTextPosition(current);
+						currentLine.add(currentGroupedText);
+					}
+					else currentGroupedText.appendTextPosition(current);
+					if (lastLine != null && currentGroupedText.toString().contains(lastLine))
+						toLastRow = true;
+					
+					previous = current;
+				} 
 			}
 		}
-		return null;
+		return tableResult;
 	}
 	
 	/**
@@ -139,13 +145,12 @@ public class PdfProcessor implements Closeable {
 	 * @param headerLines - how many lines belong to the header
 	 * @return
 	 */
-	protected JSONArray getTableHeader(List<TextPosition> tableContent, int startIndex, int headerLines) {
+	/*
+	protected JSONArray getTableHeader(List<TextPosition> tableContent, int startIndex, float xLeft) {
 		JSONArray array = null;
 		
 		return array;
-	}
-	
-	
+	}*/
 	public int searchLine(String keywordLine) {
 		int pageNumber = -1;
 		try {				//keywordLine += stripper.LINE_SEPARATOR;
