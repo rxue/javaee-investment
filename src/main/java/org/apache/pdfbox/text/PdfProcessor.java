@@ -88,11 +88,10 @@ public class PdfProcessor implements Closeable {
 	 * @param includeLast
 	 * @return
 	 */
-	protected List<List<GroupedLineTextPosition>> getTableTextPositionList(String lineKeyword, 
+	protected Table getTableTextPositionList(String lineKeyword, 
 			List<List<TextPosition>> textPositionLists, String lastLine) {
-		List<List<GroupedLineTextPosition>> tableResult = new ArrayList<List<GroupedLineTextPosition>>();
+		Table tableResult = new Table();
 		GroupedLineTextPosition currentGroupedText = null;
-		List<GroupedLineTextPosition> currentLine = null;
 		boolean toLastRow = false;
 		for (List<TextPosition> currentList : textPositionLists) {
 			int keywordIndex = 0;
@@ -116,21 +115,16 @@ public class PdfProcessor implements Closeable {
 				}
 				//Detected keyword, process the text in the table
 				else if (keywordDetected) {
-					if (previous.getY() < current.getY()) {
-						if (toLastRow) return tableResult;
-						currentLine = new ArrayList<GroupedLineTextPosition>();
-						tableResult.add(currentLine);
-					}
+					if (previous.getY() < current.getY() && toLastRow) return tableResult;	
 					if (previous.getY() < current.getY() 
 							|| current.getX() - previous.getX() > 2*previous.getWidth())
 					{
 						currentGroupedText = new GroupedLineTextPosition(current);
-						currentLine.add(currentGroupedText);
+						tableResult.appendCellData(currentGroupedText);
 					}
-					else currentGroupedText.appendTextPosition(current);
+					else if (previous.getY() == current.getY()) currentGroupedText.appendTextPosition(current);
 					if (lastLine != null && currentGroupedText.toString().contains(lastLine))
 						toLastRow = true;
-					
 					previous = current;
 				} 
 			}
