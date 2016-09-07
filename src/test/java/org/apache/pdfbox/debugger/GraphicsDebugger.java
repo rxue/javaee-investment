@@ -2,6 +2,7 @@ package org.apache.pdfbox.debugger;
 
 import java.awt.Container;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
 import java.util.List;
 
@@ -16,11 +17,13 @@ public class GraphicsDebugger {
 			/**
 			 * 
 			 */
-			private static final long serialVersionUID = 1L;
+			//private static final long serialVersionUID = 1L;
 
 			@Override
 			public void paint(Graphics g) {
-				g.drawRect(10, 10, 10, 20);
+				Graphics2D g2D = (Graphics2D) g;
+				pathList.stream().forEach(e ->
+					g2D.draw(e));	
 			}
 		};
 		panel.add(comp);
