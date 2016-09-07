@@ -13,6 +13,7 @@ public class GraphicsDebugger {
 	public static void showGraphics(List<GeneralPath> pathList) {
 		PDFDebugger debugger = new PDFDebugger();
 		Container panel = debugger.getContentPane();
+		//Ref: https://kodejava.org/how-do-i-draw-a-generalpath-in-java-2d/
 		JComponent comp = new JComponent() {
 			/**
 			 * 
