@@ -7,19 +7,16 @@ import java.awt.geom.GeneralPath;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JScrollPane;
 
 public class GraphicsDebugger {
 	
-	public static void showGraphics(List<GeneralPath> pathList) {
+	@SuppressWarnings("serial")
+	public static void showGraphics(int windowWidth, int windowHeight, List<GeneralPath> pathList) {
 		PDFDebugger debugger = new PDFDebugger();
 		Container panel = debugger.getContentPane();
 		//Ref: https://kodejava.org/how-do-i-draw-a-generalpath-in-java-2d/
 		JComponent comp = new JComponent() {
-			/**
-			 * 
-			 */
-			//private static final long serialVersionUID = 1L;
-
 			@Override
 			public void paint(Graphics g) {
 				Graphics2D g2D = (Graphics2D) g;
@@ -28,8 +25,14 @@ public class GraphicsDebugger {
 			}
 		};
 		panel.add(comp);
-		debugger.setSize(600, 600);
+		debugger.setSize(windowWidth, windowHeight+100);
 		debugger.setVisible(true);
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

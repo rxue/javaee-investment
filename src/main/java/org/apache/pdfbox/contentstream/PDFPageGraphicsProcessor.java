@@ -27,12 +27,15 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     private int clipWindingRule;
     private AffineTransform translateInstance;
     private AffineTransform scaleInstance;
+    private float pageHeight;
+    private float pageWidth;
 
     public PDFPageGraphicsProcessor(PDPage page)
     {
     	super(page);
-    	float pageHeight = page.getCropBox().getHeight();
-    	this.translateInstance = AffineTransform.getTranslateInstance(0, -pageHeight);
+    	this.pageHeight = page.getCropBox().getHeight();
+    	this.pageWidth = page.getCropBox().getWidth();
+    	this.translateInstance = AffineTransform.getTranslateInstance(0, -this.pageHeight);
     	this.scaleInstance = AffineTransform.getScaleInstance(1, -1);
         this.clipWindingRule = -1;
         this.lines = new ArrayList<>();
@@ -40,7 +43,16 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
         this.currentGeneralPath = new GeneralPath();
     }
     
+    public int getPageHeightInt() {
+    	return Math.round(this.pageHeight);
+    }
+    
+    public int getPageWidth() {
+    	return Math.round(this.pageWidth);
+    }
+    
     protected void transformGeneralPathToTextQuadrant(GeneralPath generalPath) {
+    	//generalPath.get
     	generalPath.transform(this.translateInstance);
     	generalPath.transform(this.scaleInstance);
     }
@@ -69,7 +81,7 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public void clip(int windingRule) throws IOException
     {
-    	System.out.println("clip");
+    	//System.out.println("clip");
         // the clipping path will not be updated until the succeeding painting operator is called
         clipWindingRule = windingRule;
     }
@@ -77,14 +89,14 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public void moveTo(float x, float y) throws IOException
     {
-    	System.out.println("moveTo");
+    	//System.out.println("moveTo");
         this.currentGeneralPath.moveTo(x, y);
     }
 
     @Override
     public void lineTo(float x, float y) throws IOException
     {
-    	System.out.println("lineTo");
+    	//System.out.println("lineTo");
         this.currentGeneralPath.lineTo(x, y);
     }
 
@@ -98,7 +110,7 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public Point2D getCurrentPoint() throws IOException
     {
-    	System.out.println("getCurrentPoint");
+    	//System.out.println("getCurrentPoint");
         return this.currentGeneralPath.getCurrentPoint();
     }
     /**
@@ -107,7 +119,7 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public void closePath() throws IOException
     {
-    	System.out.println("closePath");
+    	//System.out.println("closePath");
         this.currentGeneralPath.closePath();
     }
     /**
@@ -116,7 +128,7 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public void endPath() throws IOException
     {
-    	System.out.println("endPath");
+    	//System.out.println("endPath");
         if (clipWindingRule != -1)
         {
             this.currentGeneralPath.setWindingRule(clipWindingRule);
@@ -141,7 +153,7 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public void strokePath() throws IOException
     {
-    	System.out.println("strokePath");
+    	//System.out.println("strokePath");
         //add path line to list
         //this.currentGeneralPath.reset();
     	//this.transformGeneralPathToTextQuadrant(this.currentGeneralPath);
@@ -153,7 +165,7 @@ public class PDFPageGraphicsProcessor extends PDFGraphicsStreamEngine
     @Override
     public void fillPath(int windingRule) throws IOException
     {
-    	System.out.println("fillPath");
+    	//System.out.println("fillPath");
         //this.currentGeneralPath.reset();
     	this.generalPaths.add(this.currentGeneralPath);
         this.currentGeneralPath = new GeneralPath();
