@@ -7,7 +7,7 @@ import java.net.URL;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDPage;
 
-public abstract class TableSearchEngine {
+public abstract class TableSearchEngineTemplate {
 	private String pdfSourceURLStr;
 	private byte[] pdfContentBytes;
 	
