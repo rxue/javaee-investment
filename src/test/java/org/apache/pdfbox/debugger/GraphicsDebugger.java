@@ -7,16 +7,18 @@ import java.awt.geom.GeneralPath;
 import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.JScrollPane;
 
 public class GraphicsDebugger {
 	
 	@SuppressWarnings("serial")
-	public static void showGraphics(int windowWidth, int windowHeight, List<GeneralPath> pathList) {
+	public void showGraphics(int windowWidth, int windowHeight, List<GeneralPath> pathList) {
 		PDFDebugger debugger = new PDFDebugger();
 		Container panel = debugger.getContentPane();
 		//Ref: https://kodejava.org/how-do-i-draw-a-generalpath-in-java-2d/
 		JComponent comp = new JComponent() {
+			/**
+			 * Callback
+			 */
 			@Override
 			public void paint(Graphics g) {
 				Graphics2D g2D = (Graphics2D) g;

@@ -1,21 +1,23 @@
 package org.apache.pdfbox;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageTree;
 
 public abstract class TableSearchEngineTemplate {
 	private String pdfSourceURLStr;
-	private byte[] pdfContentBytes;
+	private PDDocument pdDocument;
 	
-	public void setContentBytes(String pdfSourceURLStr) 
+	public void setPDDocument(String pdfSourceURLStr) 
 			throws IllegalArgumentException, IOException {
 		this.pdfSourceURLStr = pdfSourceURLStr;
 		URL pdfFilePath = new URL(this.pdfSourceURLStr);
-		this.pdfContentBytes = IOUtils.toByteArray(pdfFilePath);
+		byte[] pdfContentBytes = IOUtils.toByteArray(pdfFilePath);
+		this.pdDocument = PDDocument.load(pdfContentBytes);
 	}
 	
 	public abstract PDPage getPage(String tableKeyword);
@@ -30,7 +32,7 @@ public abstract class TableSearchEngineTemplate {
 	public void getTable(String pdfSourceURLStr, String tableKeyword) 
 			throws IllegalArgumentException, IOException {
 		if (! pdfSourceURLStr.equals(this.pdfSourceURLStr))
-			this.setContentBytes(pdfSourceURLStr);
+			this.setPDDocument(pdfSourceURLStr);
 		this.getTable(tableKeyword);
 	}
 }

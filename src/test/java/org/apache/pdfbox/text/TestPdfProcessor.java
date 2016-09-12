@@ -19,6 +19,7 @@ public class TestPdfProcessor {
 	//private static String sampleFilePath;
 	private static URL sampleUrl;
 	private static PdfProcessor processor;
+	/*
 	
 	@BeforeClass
 	public static void setupOnce() {
@@ -49,20 +50,14 @@ public class TestPdfProcessor {
 			e.printStackTrace();
 		}
 		int[] index = {-1};
+		/*
 		List<TextPosition> textPositionList = this.processor.getTextPositionList("E.ON SE and Subsidiaries Consolidated Balance Sheets—Assets", pageContent, index);
 		assertEquals("D", textPositionList.get(index[0]).toString());
 		for (int i = index[0]; i < index[0]+500; i++) {
 			TextPosition current = textPositionList.get(i);
 			System.out.println(current + "[" + current.getX() + ", " + current.getY() + ", " + current.getWidth() + ", " + current.getXScale() + ", " + current.getFontSizeInPt() + "]");
-		} 
-	}
-	@AfterClass
-	public static void close() {
-		try {
-			processor.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		
 	}
+*/
 }
