@@ -1,63 +1,45 @@
 package org.apache.pdfbox.text;
 
-
-import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
-public class PdfProcessor implements Closeable {
-	private byte[] inMemoryByteContent;
+public class PdfTextProcessor implements AutoCloseable {
 	private PDDocument pdDocument;
-	public PdfProcessor(URL url) throws IOException {
-		this.inMemoryByteContent = this.downloadBytes(url);
-		this.pdDocument = PDDocument.load(inMemoryByteContent);
+	public PdfTextProcessor(String pdfSourceURLStr) throws 
+			IllegalArgumentException, IOException {
+		URL pdfFilePath = new URL(pdfSourceURLStr);
+		byte[] pdfContentBytes = IOUtils.toByteArray(pdfFilePath);
+		this.pdDocument = PDDocument.load(pdfContentBytes);
 	}
-	
-	private byte[] downloadBytes(URL url) {
-		int len = 0;//limit: maximum of int, i.e. 2GB
-		byte[] content = null;
-		InputStream inputStream = null;
-		BufferedInputStream bufferedInputStream = null;
-		try {
-			len = url.openConnection().getContentLength();
-			content = new byte[len];
-			inputStream = url.openStream();
-			bufferedInputStream = new BufferedInputStream(inputStream);
-			int read = 0;
-			int offset = 0;
-			while ((read = bufferedInputStream.read(content, offset, len-offset)) > 0) {
-				offset += read;
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-				try {
-					if (inputStream != null) inputStream.close();
-					if (bufferedInputStream != null) bufferedInputStream.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}
-		return content;
+	public PdfTextProcessor(PDDocument pdDocument) throws IOException {
+		this.pdDocument = pdDocument;
 	}
-	
-	public Iterator<PDPage> getPageIterator() {
+		
+	private Iterator<PDPage> getPageIterator() {
 		PDPageTree pageTree = this.pdDocument.getPages();
 		return pageTree.iterator();
 	}
+	
+	private Stream<PDPage> getPageListStream() {
+		Iterable<PDPage> pageIterable = () -> this.getPageIterator();
+		return StreamSupport.stream(pageIterable.spliterator(), false);
+	}
+	
 	/**
 	 * 
 	 * @param lineKeyword - keyword, which can determine a unique line
@@ -65,19 +47,40 @@ public class PdfProcessor implements Closeable {
 	 * @return
 	 * @throws IOException
 	 */
-	public List<List<TextPosition>> searchUniquePage(String lineKeyword, Iterator<PDPage> pages) throws IOException {
-		PDFTextStripper stripper = null;
-		stripper = new PDFTextStripper();
-		stripper.setSortByPosition(true);
-		while (pages.hasNext()) {
-			PDPage currentPage = pages.next();
-			PDDocument doc = new PDDocument();
-			doc.addPage(currentPage);
-			String text = stripper.getText(doc);
-			if (text.contains(lineKeyword + stripper.getLineSeparator())) 
-				return stripper.getCharactersByArticle();
-		}
-		return null;
+	public PDPage searchFirstPage(String lineKeyword) throws IOException {
+		Optional<PDPage> page= this.getPageListStream().filter(p -> {
+			PDDocument currentDoc = null;
+			try (InputStream currentInputStream = p.getContents()) {
+				PDFTextStripper pdfTextStripper = new PDFTextStripper();
+				currentDoc = new PDDocument();
+				currentDoc.addPage(p);
+				String currentPageText = pdfTextStripper.getText(currentDoc);
+				currentDoc.close();
+				if(currentPageText.contains(lineKeyword))
+					return true;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				if (currentDoc != null)
+					try {
+						currentDoc.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			}
+			return false;
+		}).findFirst();
+		if (page.isPresent()) return page.get();
+		else return null;
+	}
+	//pdfTextStripper.stripper.getCharactersByArticle() remember to use this!
+	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) {
+		return this.searchFirstPage(lineKeyword).getCh
+	}
+	public TextPosition getTableHeaderTexts(String lineKeyword, PDPage page) {
+		List<>
 	}
 	/**
 	 * 
@@ -88,6 +91,7 @@ public class PdfProcessor implements Closeable {
 	 * @param includeLast
 	 * @return
 	 */
+	/*
 	protected Table getTableTextPositionList(String lineKeyword, 
 			List<List<TextPosition>> textPositionLists, String lastLine) {
 		Table tableResult = new Table();
@@ -131,6 +135,7 @@ public class PdfProcessor implements Closeable {
 		}
 		return tableResult;
 	}
+	*/
 	
 	/**
 	 * 
