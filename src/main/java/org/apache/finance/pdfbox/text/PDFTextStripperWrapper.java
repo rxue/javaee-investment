@@ -19,7 +19,7 @@ public class PDFTextStripperWrapper extends PDFTextStripper {
 	}
 	
 	public List<List<TextPosition>> getCharactersByArticle() {
-		return this.getCharactersByArticle();
+		return super.getCharactersByArticle();
 	}
 
 }
