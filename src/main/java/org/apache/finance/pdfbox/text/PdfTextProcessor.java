@@ -1,13 +1,9 @@
-package org.apache.pdfbox.text;
+package org.apache.finance.pdfbox.text;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -39,49 +35,59 @@ public class PdfTextProcessor implements AutoCloseable {
 		Iterable<PDPage> pageIterable = () -> this.getPageIterator();
 		return StreamSupport.stream(pageIterable.spliterator(), false);
 	}
-	
-	/**
+
+ 	/**
 	 * 
 	 * @param lineKeyword - keyword, which can determine a unique line
 	 * @param pages - iterator of pages
 	 * @return
 	 * @throws IOException
 	 */
-	public PDPage searchFirstPage(String lineKeyword) throws IOException {
-		Optional<PDPage> page= this.getPageListStream().filter(p -> {
-			PDDocument currentDoc = null;
-			try (InputStream currentInputStream = p.getContents()) {
-				PDFTextStripper pdfTextStripper = new PDFTextStripper();
-				currentDoc = new PDDocument();
-				currentDoc.addPage(p);
-				String currentPageText = pdfTextStripper.getText(currentDoc);
-				currentDoc.close();
-				if(currentPageText.contains(lineKeyword))
-					return true;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-				if (currentDoc != null)
-					try {
-						currentDoc.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+	private Object searchFirstPage(String lineKeyword, Class<?> returnType) 
+			throws IOException {
+		Iterator<PDPage> pages = this.getPageIterator();
+		PDFTextStripperWrapper textStripper = new PDFTextStripperWrapper();
+		PDDocument doc = new PDDocument();
+		while (pages.hasNext()) {
+			PDPage currentPage = pages.next();
+			doc.addPage(currentPage);
+			String currentPageText = textStripper.getText(doc);
+			doc.removePage(currentPage);
+			if (currentPageText.contains(lineKeyword)) {
+				doc.close();
+				if (returnType.equals(PDFTextStripperWrapper.class))
+					return textStripper;
+				else if (returnType.equals(List.class))
+					return textStripper.getCharactersByArticle();
 			}
-			return false;
-		}).findFirst();
-		if (page.isPresent()) return page.get();
-		else return null;
+		}
+		doc.close();
+		return null;
 	}
+	/*
+	public PDPage searchFistPDPage(String lineKeyword) throws IOException
+	{
+		return (PDPage) searchFirstPage(lineKeyword, PDPage.class);
+	}*/
+
+	@SuppressWarnings("unchecked")
+	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) 
+			throws IOException {
+		return (List<List<TextPosition>>) searchFirstPage(lineKeyword, List.class);
+	}
+	
+	public PDFTextStripperWrapper searchFistPageTextStripper(String lineKeyword) 
+			throws IOException {
+		return (PDFTextStripperWrapper) searchFirstPage(lineKeyword, PDFTextStripperWrapper.class);
+	}
+	
 	//pdfTextStripper.stripper.getCharactersByArticle() remember to use this!
-	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) {
-		return this.searchFirstPage(lineKeyword).getCh
-	}
-	public TextPosition getTableHeaderTexts(String lineKeyword, PDPage page) {
-		List<>
-	}
+//	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) {
+//		return this.searchFirstPage(lineKeyword).getCh
+//	}
+//	public TextPosition getTableHeaderTexts(String lineKeyword, PDPage page) {
+//		List<>
+//	}
 	/**
 	 * 
 	 * @param lineKeyword
@@ -136,46 +142,6 @@ public class PdfTextProcessor implements AutoCloseable {
 		return tableResult;
 	}
 	*/
-	
-	/**
-	 * 
-	 * @param tableContent
-	 * @param startIndex
-	 * @param headerLines - how many lines belong to the header
-	 * @return
-	 */
-	/*
-	protected JSONArray getTableHeader(List<TextPosition> tableContent, int startIndex, float xLeft) {
-		JSONArray array = null;
-		
-		return array;
-	}*/
-	public int searchLine(String keywordLine) {
-		int pageNumber = -1;
-		try {				//keywordLine += stripper.LINE_SEPARATOR;
-			PDFTextStripper stripper = new PDFTextStripper();
-			keywordLine += stripper.getLineSeparator();
-			int pages = this.pdDocument.getNumberOfPages();
-			for (int i = 1; i <= pages; i ++) {
-				stripper.setStartPage(i);
-				stripper.setEndPage(i);
-				String content = stripper.getText(this.pdDocument);
-				if (content.contains(keywordLine)) {
-					List<List<TextPosition>> l = stripper.getCharactersByArticle();
-					for (List<TextPosition> c : l) {
-						for (TextPosition current : c) {
-							System.out.println(current.toString());
-						}
-					}
-					return i;
-				}
-				}
-		} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-		}
-		return pageNumber;
-	}
 
 	public void close() throws IOException {
 		// TODO Auto-generated method stub
