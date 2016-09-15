@@ -4,25 +4,24 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
-public class PdfTextProcessor implements AutoCloseable {
+public class PDFTextSearchEngine {
 	private PDDocument pdDocument;
-	public PdfTextProcessor(String pdfSourceURLStr) throws 
+	private String previousLineKeyword;
+	private PDFTextStripperWrapper textStripper;
+	public PDFTextSearchEngine(String pdfSourceURLStr) throws 
 			IllegalArgumentException, IOException {
 		URL pdfFilePath = new URL(pdfSourceURLStr);
 		byte[] pdfContentBytes = IOUtils.toByteArray(pdfFilePath);
 		this.pdDocument = PDDocument.load(pdfContentBytes);
 	}
-	public PdfTextProcessor(PDDocument pdDocument) throws IOException {
+	public PDFTextSearchEngine(PDDocument pdDocument) throws IOException {
 		this.pdDocument = pdDocument;
 	}
 		
@@ -31,54 +30,60 @@ public class PdfTextProcessor implements AutoCloseable {
 		return pageTree.iterator();
 	}
 	
-	private Stream<PDPage> getPageListStream() {
-		Iterable<PDPage> pageIterable = () -> this.getPageIterator();
-		return StreamSupport.stream(pageIterable.spliterator(), false);
-	}
+//	private Stream<PDPage> getPageListStream() {
+//		Iterable<PDPage> pageIterable = () -> this.getPageIterator();
+//		return StreamSupport.stream(pageIterable.spliterator(), false);
+//	}
 
+	private PDFTextStripperWrapper searchFirstPage(String lineKeyword) 
+			throws IOException {
+		this.textStripper = new PDFTextStripperWrapper();
+		Iterator<PDPage> pages = this.getPageIterator();
+		PDDocument doc = new PDDocument();
+		while (pages.hasNext()) {
+			PDPage currentPage = pages.next();
+			doc.addPage(currentPage);
+			String currentPageText = this.textStripper.getText(doc);
+			doc.removePage(currentPage);
+			if (currentPageText.contains(lineKeyword)) {
+				doc.close();
+				return this.textStripper;
+			}
+		}
+		doc.close();
+		return null;
+	}
  	/**
 	 * 
-	 * @param lineKeyword - keyword, which can determine a unique line
+	 * @param lineKeyword - keyword, which can determine a unique line, can not be null (exception not handled yet)
 	 * @param pages - iterator of pages
 	 * @return
 	 * @throws IOException
 	 */
 	private Object searchFirstPage(String lineKeyword, Class<?> returnType) 
 			throws IOException {
-		Iterator<PDPage> pages = this.getPageIterator();
-		PDFTextStripperWrapper textStripper = new PDFTextStripperWrapper();
-		PDDocument doc = new PDDocument();
-		while (pages.hasNext()) {
-			PDPage currentPage = pages.next();
-			doc.addPage(currentPage);
-			String currentPageText = textStripper.getText(doc);
-			doc.removePage(currentPage);
-			if (currentPageText.contains(lineKeyword)) {
-				doc.close();
-				if (returnType.equals(PDFTextStripperWrapper.class))
-					return textStripper;
-				else if (returnType.equals(List.class))
-					return textStripper.getCharactersByArticle();
-			}
+		PDFTextStripperWrapper textStripper = null;
+		if ((!lineKeyword.equals(this.previousLineKeyword))) {
+			textStripper = this.searchFirstPage(lineKeyword);
+			this.previousLineKeyword = lineKeyword;
 		}
-		doc.close();
+		else textStripper = this.textStripper;
+		
+		if (textStripper != null && returnType.equals(PDPage.class))
+			return textStripper.getCurrentPage();
+		else if (textStripper != null && returnType.equals(List.class))
+			return textStripper.getCharactersByArticle();
 		return null;
 	}
-	/*
+	
 	public PDPage searchFistPDPage(String lineKeyword) throws IOException
 	{
 		return (PDPage) searchFirstPage(lineKeyword, PDPage.class);
-	}*/
-
+	}
 	@SuppressWarnings("unchecked")
 	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) 
 			throws IOException {
 		return (List<List<TextPosition>>) searchFirstPage(lineKeyword, List.class);
-	}
-	
-	public PDFTextStripperWrapper searchFistPageTextStripper(String lineKeyword) 
-			throws IOException {
-		return (PDFTextStripperWrapper) searchFirstPage(lineKeyword, PDFTextStripperWrapper.class);
 	}
 	
 	//pdfTextStripper.stripper.getCharactersByArticle() remember to use this!
@@ -142,9 +147,4 @@ public class PdfTextProcessor implements AutoCloseable {
 		return tableResult;
 	}
 	*/
-
-	public void close() throws IOException {
-		// TODO Auto-generated method stub
-		this.pdDocument.close();
-	}
 }
