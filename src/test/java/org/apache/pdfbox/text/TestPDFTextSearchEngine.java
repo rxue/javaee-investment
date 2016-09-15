@@ -1,23 +1,21 @@
 package org.apache.pdfbox.text;
 
-import org.apache.finance.pdfbox.text.PDFTextStripperWrapper;
-import org.apache.finance.pdfbox.text.PdfTextProcessor;
+import org.apache.finance.pdfbox.text.PDFTextSearchEngine;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 
-public class TestPdfTextProcessor {
+public class TestPDFTextSearchEngine {
 	
 	@Test
 	public void testSearchUniqePageAndGetTextPositionList() {
-		PdfTextProcessor processor;
+		PDFTextSearchEngine processor;
 		try {
 			String keyword = "E.ON SE and Subsidiaries Consolidated Balance Sheets—Assets";
-			processor = new PdfTextProcessor("http://www.eon.com/content/dam/eon-com/ueber-uns/publications/EON_Annual_Report_2015_EN.pdf");
-			PDFTextStripperWrapper textStripper = processor.searchFistPageTextStripper(keyword);
-			List<List<TextPosition>> textPositions = textStripper.getCharactersByArticle();
+			processor = new PDFTextSearchEngine("http://www.eon.com/content/dam/eon-com/ueber-uns/publications/EON_Annual_Report_2015_EN.pdf");
+			List<List<TextPosition>> textPositions = processor.searchFirstTextPositionList(keyword);
 			textPositions.forEach(l -> {
 				l.forEach(e -> {
 					System.out.println("DEBUG::" + e.getUnicode());

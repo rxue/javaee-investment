@@ -1,11 +1,13 @@
-package org.apache.pdfbox.text;
+package org.apache.finance.pdfbox;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class Table {
+import org.apache.finance.pdfbox.text.GroupedLineTextPosition;
+
+public class PdfTable {
 	private LinkedList<LinkedList<GroupedLineTextPosition>> table;
-	public Table() {
+	public PdfTable() {
 		this.table = new LinkedList<LinkedList<GroupedLineTextPosition>>();
 	}
 	public void appendCellData (GroupedLineTextPosition cellData) {

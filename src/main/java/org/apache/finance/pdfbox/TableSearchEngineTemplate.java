@@ -1,4 +1,4 @@
-package org.apache.pdfbox;
+package org.apache.finance.pdfbox;
 
 import java.io.IOException;
 import java.net.URL;
