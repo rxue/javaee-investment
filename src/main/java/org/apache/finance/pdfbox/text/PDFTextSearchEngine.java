@@ -2,8 +2,11 @@ package org.apache.finance.pdfbox.text;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -35,7 +38,14 @@ public class PDFTextSearchEngine {
 //		return StreamSupport.stream(pageIterable.spliterator(), false);
 //	}
 
-	private PDFTextStripperWrapper searchFirstPage(String lineKeyword) 
+	/**
+	 * textStripper is a member of this object so that it might be reused directly sometimes
+	 * 
+	 * @param lineKeyword
+	 * @return
+	 * @throws IOException
+	 */
+	private boolean searchFirstPage(String lineKeyword) 
 			throws IOException {
 		this.textStripper = new PDFTextStripperWrapper();
 		Iterator<PDPage> pages = this.getPageIterator();
@@ -47,11 +57,11 @@ public class PDFTextSearchEngine {
 			doc.removePage(currentPage);
 			if (currentPageText.contains(lineKeyword)) {
 				doc.close();
-				return this.textStripper;
+				return true;
 			}
 		}
 		doc.close();
-		return null;
+		return false;
 	}
  	/**
 	 * 
@@ -62,17 +72,16 @@ public class PDFTextSearchEngine {
 	 */
 	private Object searchFirstPage(String lineKeyword, Class<?> returnType) 
 			throws IOException {
-		PDFTextStripperWrapper textStripper = null;
+		boolean found = false;
 		if ((!lineKeyword.equals(this.previousLineKeyword))) {
-			textStripper = this.searchFirstPage(lineKeyword);
+			found = this.searchFirstPage(lineKeyword);
 			this.previousLineKeyword = lineKeyword;
 		}
-		else textStripper = this.textStripper;
-		
-		if (textStripper != null && returnType.equals(PDPage.class))
-			return textStripper.getCurrentPage();
-		else if (textStripper != null && returnType.equals(List.class))
-			return textStripper.getCharactersByArticle();
+
+		if (found && returnType.equals(PDPage.class))
+			return this.textStripper.getCurrentPage();
+		else if (found && returnType.equals(List.class))
+			return this.textStripper.getCharactersByArticle();
 		return null;
 	}
 	
@@ -80,10 +89,31 @@ public class PDFTextSearchEngine {
 	{
 		return (PDPage) searchFirstPage(lineKeyword, PDPage.class);
 	}
+	/**
+	 * 
+	 * @param pageFullText
+	 * @return
+	 */
+	private Map<Float,TextPosition> combineCharsToWords(List<List<TextPosition>> pageFullText) {
+		//boolean firstCharMatched = false;
+		Map<Float,TextPosition> linePosition = new HashMap<>();
+		for (List<TextPosition> article : pageFullText) {
+			for (TextPosition current : article) {
+				TextPosition currentLine = linePosition.get(current.getY());
+				if (currentLine == null)
+					linePosition.put(current.getY(), current);
+				else
+					currentLine.mergeDiacritic(current);
+			}
+		}
+		return linePosition;
+	}
 	@SuppressWarnings("unchecked")
-	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) 
+	public Map<Float,TextPosition> searchFirstTextPositionList(String lineKeyword) 
 			throws IOException {
-		return (List<List<TextPosition>>) searchFirstPage(lineKeyword, List.class);
+		List<List<TextPosition>> pageFullText = (List<List<TextPosition>>) 
+				searchFirstPage(lineKeyword, List.class);
+		return this.combineCharsToWords(pageFullText);
 	}
 	
 	//pdfTextStripper.stripper.getCharactersByArticle() remember to use this!
