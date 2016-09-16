@@ -1,11 +1,13 @@
-package org.apache.pdfbox.text;
+package org.apache.finance.pdfbox.text;
 
-public class GroupedLineTextPosition {
-	private String text;
+import org.apache.pdfbox.text.TextPosition;
+
+public class WordPosition {
+	private String word;
 	private float xStart;
 	private float xEnd;
 	private float y;
-	public GroupedLineTextPosition(TextPosition textPosition) {
+	public WordPosition(TextPosition textPosition) {
 		this.text = null;
 		this.appendTextPosition(textPosition);
 	}

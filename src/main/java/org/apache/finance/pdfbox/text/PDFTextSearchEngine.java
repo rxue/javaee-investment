@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -89,27 +90,50 @@ public class PDFTextSearchEngine {
 	{
 		return (PDPage) searchFirstPage(lineKeyword, PDPage.class);
 	}
+	private boolean inTheSameWord(TextPosition word, TextPosition charToAdd, float scale) {
+		float seam = charToAdd.getX() - word.getX() - word.getWidth();
+		System.out.println("word = " + word.toString() + ", length=" + word.toString().length() + " its x = " + word.getX() + 
+				"xwidth = " + word.getWidth() +
+				", charToAdd = " + charToAdd.toString() + ", its x = " + charToAdd.getX());
+		System.out.println("word = " + word.toString() + ", seam = " + seam);
+		float averageCharWidth = word.getWidth() / word.getUnicode().length();
+		return  seam / averageCharWidth < scale;
+	}
+	private TextPosition combineTextPosition(TextPosition base, TextPosition charToAdd) {
+		float newWidth = charToAdd.getX() - base.getX() + charToAdd.getWidth();
+		base.mergeDiacritic(charToAdd);
+		
+		return base;
+	}
 	/**
 	 * 
 	 * @param pageFullText
 	 * @return
 	 */
-	private Map<Float,TextPosition> combineCharsToWords(List<List<TextPosition>> pageFullText) {
+	private Map<Float,LinkedList<TextPosition>> combineCharsToWords(List<List<TextPosition>> pageFullText) {
 		//boolean firstCharMatched = false;
-		Map<Float,TextPosition> linePosition = new HashMap<>();
+		Map<Float,LinkedList<TextPosition>> linePosition = new HashMap<>();
 		for (List<TextPosition> article : pageFullText) {
 			for (TextPosition current : article) {
-				TextPosition currentLine = linePosition.get(current.getY());
-				if (currentLine == null)
-					linePosition.put(current.getY(), current);
-				else
-					currentLine.mergeDiacritic(current);
+				System.out.println("DEBUG:" + current.getUnicode() + ", y=" + current.getY() + ", x=" + current.getX() + ", width is " + current.getWidth());
+				LinkedList<TextPosition> currentLine = (LinkedList) linePosition.get(current.getY());
+				if (currentLine == null) {
+					LinkedList<TextPosition> newTextPositionList = new LinkedList<>();
+					newTextPositionList.add(current);
+					linePosition.put(current.getY(), newTextPositionList);
+				}
+				else {
+					TextPosition lastTextPosition = currentLine.peekLast();
+					if (this.inTheSameWord(lastTextPosition, current, 0.1f))
+						lastTextPosition = this.combineTextPosition(lastTextPosition, current);
+					else currentLine.add(current);
+				}
 			}
 		}
 		return linePosition;
 	}
 	@SuppressWarnings("unchecked")
-	public Map<Float,TextPosition> searchFirstTextPositionList(String lineKeyword) 
+	public Map<Float,LinkedList<TextPosition>> searchFirstTextPositionList(String lineKeyword) 
 			throws IOException {
 		List<List<TextPosition>> pageFullText = (List<List<TextPosition>>) 
 				searchFirstPage(lineKeyword, List.class);
