@@ -7,26 +7,17 @@ public class WordPosition {
 	private float xStart;
 	private float xEnd;
 	private float y;
-	public WordPosition(TextPosition textPosition) {
-		this.text = null;
-		this.appendTextPosition(textPosition);
+	public WordPosition(TextPosition startTextPosition) {
+		this.word = startTextPosition.getUnicode();
+		this.xStart = startTextPosition.getX();
+		this.xEnd = this.xStart + startTextPosition.getWidth();
 	}
 	public void appendTextPosition(TextPosition textPosition) {
-		if (this.text == null) {
-			this.text = textPosition.getUnicode();
-			this.y = textPosition.getY();
-			this.xStart = textPosition.getX();
-			this.xEnd = this.xStart + textPosition.getWidth();
-		}
-		else {
-			this.text += textPosition.getUnicode();
-			this.xEnd = textPosition.getX() + textPosition.getWidth();
-		}
 		
 	}
 	@Override
 	public String toString() {
-		return this.text;
+		return this.word;
 	}
 	
 	public float getXStart() {
