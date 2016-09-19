@@ -13,22 +13,23 @@ public class WordPosition {
 		this.appendTextPosition(textPosition);
 	}
 	/**
+	 * Append a TextPosition to the end of this WordPosition
 	 * 
 	 * @param textPosition
 	 * @return
 	 */
 	public boolean appendTextPosition(TextPosition textPosition) {
-		if (this.y != textPosition.getY())
-			return false;
-		if ((textPosition.getX() - this.xEnd) / textPosition.getWidth() > this.ratio)
+		if (textPosition == null) throw new NullPointerException();
+		if ((this.y > 0 && this.y != textPosition.getY()) || 
+				(this.xEnd > 0 && (textPosition.getX() - this.xEnd) / textPosition.getWidth() > this.ratio)
+				|| (this.y == textPosition.getY() && textPosition.toString().equals(" ")))
 			return false;
 		if (this.word == null) {
 			this.word = textPosition.getUnicode();
 			this.y = textPosition.getY();
 			this.xStart = textPosition.getX();
 			this.xEnd = this.xStart + textPosition.getWidth();
-		}
-		else {
+		} else {
 			this.word += textPosition.getUnicode();
 			this.xEnd = textPosition.getX() + textPosition.getWidth();
 		}

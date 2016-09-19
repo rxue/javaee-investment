@@ -16,23 +16,23 @@ import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.text.TextPosition;
 
 public class PDFTextSearchEngine {
-	private PDDocument pdDocument;
-	private String previousLineKeyword;
-	private PDFTextStripperWrapper textStripper;
-	public PDFTextSearchEngine(String pdfSourceURLStr) throws 
-			IllegalArgumentException, IOException {
-		URL pdfFilePath = new URL(pdfSourceURLStr);
-		byte[] pdfContentBytes = IOUtils.toByteArray(pdfFilePath);
-		this.pdDocument = PDDocument.load(pdfContentBytes);
-	}
-	public PDFTextSearchEngine(PDDocument pdDocument) throws IOException {
-		this.pdDocument = pdDocument;
-	}
-		
-	private Iterator<PDPage> getPageIterator() {
-		PDPageTree pageTree = this.pdDocument.getPages();
-		return pageTree.iterator();
-	}
+//	private PDDocument pdDocument;
+//	private String previousLineKeyword;
+//	private PDFTextStripperWrapper textStripper;
+//	public PDFTextSearchEngine(String pdfSourceURLStr) throws 
+//			IllegalArgumentException, IOException {
+//		URL pdfFilePath = new URL(pdfSourceURLStr);
+//		byte[] pdfContentBytes = IOUtils.toByteArray(pdfFilePath);
+//		this.pdDocument = PDDocument.load(pdfContentBytes);
+//	}
+//	public PDFTextSearchEngine(PDDocument pdDocument) throws IOException {
+//		this.pdDocument = pdDocument;
+//	}
+//		
+//	private Iterator<PDPage> getPageIterator() {
+//		PDPageTree pageTree = this.pdDocument.getPages();
+//		return pageTree.iterator();
+//	}
 	
 //	private Stream<PDPage> getPageListStream() {
 //		Iterable<PDPage> pageIterable = () -> this.getPageIterator();
@@ -46,24 +46,24 @@ public class PDFTextSearchEngine {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean searchFirstPage(String lineKeyword) 
-			throws IOException {
-		this.textStripper = new PDFTextStripperWrapper();
-		Iterator<PDPage> pages = this.getPageIterator();
-		PDDocument doc = new PDDocument();
-		while (pages.hasNext()) {
-			PDPage currentPage = pages.next();
-			doc.addPage(currentPage);
-			String currentPageText = this.textStripper.getText(doc);
-			doc.removePage(currentPage);
-			if (currentPageText.contains(lineKeyword)) {
-				doc.close();
-				return true;
-			}
-		}
-		doc.close();
-		return false;
-	}
+//	private boolean searchFirstPage(String lineKeyword) 
+//			throws IOException {
+//		this.textStripper = new PDFTextStripperWrapper();
+//		Iterator<PDPage> pages = this.getPageIterator();
+//		PDDocument doc = new PDDocument();
+//		while (pages.hasNext()) {
+//			PDPage currentPage = pages.next();
+//			doc.addPage(currentPage);
+//			String currentPageText = this.textStripper.getText(doc);
+//			doc.removePage(currentPage);
+//			if (currentPageText.contains(lineKeyword)) {
+//				doc.close();
+//				return true;
+//			}
+//		}
+//		doc.close();
+//		return false;
+//	}
  	/**
 	 * 
 	 * @param lineKeyword - keyword, which can determine a unique line, can not be null (exception not handled yet)
@@ -71,74 +71,74 @@ public class PDFTextSearchEngine {
 	 * @return
 	 * @throws IOException
 	 */
-	private Object searchFirstPage(String lineKeyword, Class<?> returnType) 
-			throws IOException {
-		boolean found = false;
-		if ((!lineKeyword.equals(this.previousLineKeyword))) {
-			found = this.searchFirstPage(lineKeyword);
-			this.previousLineKeyword = lineKeyword;
-		}
-
-		if (found && returnType.equals(PDPage.class))
-			return this.textStripper.getCurrentPage();
-		else if (found && returnType.equals(List.class))
-			return this.textStripper.getCharactersByArticle();
-		return null;
-	}
-	
-	public PDPage searchFistPDPage(String lineKeyword) throws IOException
-	{
-		return (PDPage) searchFirstPage(lineKeyword, PDPage.class);
-	}
-	private boolean inTheSameWord(TextPosition word, TextPosition charToAdd, float scale) {
-		float seam = charToAdd.getX() - word.getX() - word.getWidth();
-		System.out.println("word = " + word.toString() + ", length=" + word.toString().length() + " its x = " + word.getX() + 
-				"xwidth = " + word.getWidth() +
-				", charToAdd = " + charToAdd.toString() + ", its x = " + charToAdd.getX());
-		System.out.println("word = " + word.toString() + ", seam = " + seam);
-		float averageCharWidth = word.getWidth() / word.getUnicode().length();
-		return  seam / averageCharWidth < scale;
-	}
-	private TextPosition combineTextPosition(TextPosition base, TextPosition charToAdd) {
-		float newWidth = charToAdd.getX() - base.getX() + charToAdd.getWidth();
-		base.mergeDiacritic(charToAdd);
-		
-		return base;
-	}
+//	private Object searchFirstPage(String lineKeyword, Class<?> returnType) 
+//			throws IOException {
+//		boolean found = false;
+//		if ((!lineKeyword.equals(this.previousLineKeyword))) {
+//			found = this.searchFirstPage(lineKeyword);
+//			this.previousLineKeyword = lineKeyword;
+//		}
+//
+//		if (found && returnType.equals(PDPage.class))
+//			return this.textStripper.getCurrentPage();
+//		else if (found && returnType.equals(List.class))
+//			return this.textStripper.getCharactersByArticle();
+//		return null;
+//	}
+//	
+//	public PDPage searchFistPDPage(String lineKeyword) throws IOException
+//	{
+//		return (PDPage) searchFirstPage(lineKeyword, PDPage.class);
+//	}
+//	private boolean inTheSameWord(TextPosition word, TextPosition charToAdd, float scale) {
+//		float seam = charToAdd.getX() - word.getX() - word.getWidth();
+//		System.out.println("word = " + word.toString() + ", length=" + word.toString().length() + " its x = " + word.getX() + 
+//				"xwidth = " + word.getWidth() +
+//				", charToAdd = " + charToAdd.toString() + ", its x = " + charToAdd.getX());
+//		System.out.println("word = " + word.toString() + ", seam = " + seam);
+//		float averageCharWidth = word.getWidth() / word.getUnicode().length();
+//		return  seam / averageCharWidth < scale;
+//	}
+//	private TextPosition combineTextPosition(TextPosition base, TextPosition charToAdd) {
+//		float newWidth = charToAdd.getX() - base.getX() + charToAdd.getWidth();
+//		base.mergeDiacritic(charToAdd);
+//		
+//		return base;
+//	}
 	/**
 	 * 
 	 * @param pageFullText
 	 * @return
 	 */
-	private Map<Float,LinkedList<TextPosition>> combineCharsToWords(List<List<TextPosition>> pageFullText) {
-		//boolean firstCharMatched = false;
-		Map<Float,LinkedList<TextPosition>> linePosition = new HashMap<>();
-		for (List<TextPosition> article : pageFullText) {
-			for (TextPosition current : article) {
-				System.out.println("DEBUG:" + current.getUnicode() + ", y=" + current.getY() + ", x=" + current.getX() + ", width is " + current.getWidth());
-				LinkedList<TextPosition> currentLine = (LinkedList) linePosition.get(current.getY());
-				if (currentLine == null) {
-					LinkedList<TextPosition> newTextPositionList = new LinkedList<>();
-					newTextPositionList.add(current);
-					linePosition.put(current.getY(), newTextPositionList);
-				}
-				else {
-					TextPosition lastTextPosition = currentLine.peekLast();
-					if (this.inTheSameWord(lastTextPosition, current, 0.1f))
-						lastTextPosition = this.combineTextPosition(lastTextPosition, current);
-					else currentLine.add(current);
-				}
-			}
-		}
-		return linePosition;
-	}
-	@SuppressWarnings("unchecked")
-	public Map<Float,LinkedList<TextPosition>> searchFirstTextPositionList(String lineKeyword) 
-			throws IOException {
-		List<List<TextPosition>> pageFullText = (List<List<TextPosition>>) 
-				searchFirstPage(lineKeyword, List.class);
-		return this.combineCharsToWords(pageFullText);
-	}
+//	private Map<Float,LinkedList<TextPosition>> combineCharsToWords(List<List<TextPosition>> pageFullText) {
+//		//boolean firstCharMatched = false;
+//		Map<Float,LinkedList<TextPosition>> linePosition = new HashMap<>();
+//		for (List<TextPosition> article : pageFullText) {
+//			for (TextPosition current : article) {
+//				System.out.println("DEBUG:" + current.getUnicode() + ", y=" + current.getY() + ", x=" + current.getX() + ", width is " + current.getWidth());
+//				LinkedList<TextPosition> currentLine = (LinkedList) linePosition.get(current.getY());
+//				if (currentLine == null) {
+//					LinkedList<TextPosition> newTextPositionList = new LinkedList<>();
+//					newTextPositionList.add(current);
+//					linePosition.put(current.getY(), newTextPositionList);
+//				}
+//				else {
+//					TextPosition lastTextPosition = currentLine.peekLast();
+//					if (this.inTheSameWord(lastTextPosition, current, 0.1f))
+//						lastTextPosition = this.combineTextPosition(lastTextPosition, current);
+//					else currentLine.add(current);
+//				}
+//			}
+//		}
+//		return linePosition;
+//	}
+//	@SuppressWarnings("unchecked")
+//	public Map<Float,LinkedList<TextPosition>> searchFirstTextPositionList(String lineKeyword) 
+//			throws IOException {
+//		List<List<TextPosition>> pageFullText = (List<List<TextPosition>>) 
+//				searchFirstPage(lineKeyword, List.class);
+//		return this.combineCharsToWords(pageFullText);
+//	}
 	
 	//pdfTextStripper.stripper.getCharactersByArticle() remember to use this!
 //	public List<List<TextPosition>> searchFirstTextPositionList(String lineKeyword) {
