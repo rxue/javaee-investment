@@ -1,14 +1,15 @@
 package org.apache.finance.pdfbox.text;
 
 import org.apache.pdfbox.text.TextPosition;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class WordPosition {
-	private String word;
+public class TextSection {
+	private String text;
 	private float xStart;
 	private float xEnd;
 	private float y;
 	private float ratio;
-	public WordPosition(TextPosition textPosition, float ratio) {
+	public TextSection(TextPosition textPosition, float ratio) {
 		this.ratio = ratio;
 		this.appendTextPosition(textPosition);
 	}
@@ -18,19 +19,18 @@ public class WordPosition {
 	 * @param textPosition
 	 * @return
 	 */
-	public boolean appendTextPosition(TextPosition textPosition) {
-		if (textPosition == null) throw new NullPointerException();
+	public boolean appendTextPosition(@NonNull TextPosition textPosition) {
 		if ((this.y > 0 && this.y != textPosition.getY()) || 
-				(this.xEnd > 0 && (textPosition.getX() - this.xEnd) / textPosition.getWidth() > this.ratio)
-				|| (this.y == textPosition.getY() && textPosition.toString().equals(" ")))
+				(this.xEnd > 0 && 
+				(textPosition.getX() - this.xEnd) / textPosition.getWidth() > this.ratio))
 			return false;
-		if (this.word == null) {
-			this.word = textPosition.getUnicode();
+		if (this.text == null) {
+			this.text = textPosition.getUnicode();
 			this.y = textPosition.getY();
 			this.xStart = textPosition.getX();
 			this.xEnd = this.xStart + textPosition.getWidth();
 		} else {
-			this.word += textPosition.getUnicode();
+			this.text += textPosition.getUnicode();
 			this.xEnd = textPosition.getX() + textPosition.getWidth();
 		}
 		return true;
@@ -38,9 +38,8 @@ public class WordPosition {
 	}
 	@Override
 	public String toString() {
-		return this.word;
+		return this.text;
 	}
-	
 	public float getXStart() {
 		return this.xStart;
 	}
@@ -51,6 +50,6 @@ public class WordPosition {
 		return this.y;
 	}
 	public float getWidth() {
-		return this.xEnd - this.xEnd;
+		return this.xEnd - this.xStart;
 	}
 }

@@ -15,32 +15,27 @@ public class MyPDFTextStripper extends PDFTextStripper {
 
 	public MyPDFTextStripper() throws IOException {
 		super();
-		// TODO Auto-generated constructor stub
 	}
-	
-	public Map<Float,LinkedList<WordPosition>> getWordPositionMap(float ratio) {
+
+	public Map<Float, LinkedList<TextSection>> getWordPositionMap(float ratio) {
 		List<List<TextPosition>> chars = super.getCharactersByArticle();
-		Map<Float,LinkedList<WordPosition>> wordPositionMap = new HashMap<Float,LinkedList<WordPosition>>();
-		chars.forEach(list ->
-			list.forEach(textPosition -> {
-				if (!textPosition.toString().equals(" ")) {
-					LinkedList<WordPosition> line = wordPositionMap.get(textPosition.getY());
-					if (line == null) {
-						line = new LinkedList<WordPosition>();
-						line.add(new WordPosition(textPosition, ratio));
-						wordPositionMap.put(textPosition.getY(), line);
-					}
-					else {
-						WordPosition lastWord = line.getLast();
-						if(!lastWord.appendTextPosition(textPosition))
-							line.addLast(new WordPosition(textPosition, ratio));
-					}
-				}
-			})
-		);
+		Map<Float, LinkedList<TextSection>> wordPositionMap = new HashMap<Float, LinkedList<TextSection>>();
+		chars.forEach(list -> list.forEach(textPosition -> {
+			LinkedList<TextSection> line = wordPositionMap.get(textPosition.getY());
+			if (line == null) {
+				line = new LinkedList<TextSection>();
+				line.add(new TextSection(textPosition, ratio));
+				wordPositionMap.put(textPosition.getY(), line);
+			} else {
+				TextSection lastWord = line.getLast();
+				if (!lastWord.appendTextPosition(textPosition) &&
+						!textPosition.getUnicode().equals(" "))
+					line.addLast(new TextSection(textPosition, ratio));
+			}
+		}));
 		return wordPositionMap;
 	}
-	
+
 	public String getText(PDPage page) throws IOException {
 		PDDocument doc = new PDDocument();
 		doc.addPage(page);
@@ -48,6 +43,5 @@ public class MyPDFTextStripper extends PDFTextStripper {
 		doc.close();
 		return text;
 	}
-	
 
 }
