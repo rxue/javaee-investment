@@ -16,5 +16,10 @@ public class FileUtility {
 		InputStream bin = new BufferedInputStream(url.openStream());
 		return Files.copy(bin, path, options);
 	}
+	
+	public static long copyFromURL(String urlString, Path path, CopyOption... options) throws IOException {
+		URL url = new URL(urlString);
+		return copy(url, path, options);
+	}
 
 }
