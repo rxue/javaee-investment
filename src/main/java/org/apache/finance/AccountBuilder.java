@@ -1,13 +1,20 @@
 package org.apache.finance;
 
+
 public class AccountBuilder {
 	private String id;
 	private double amount;
+	public AccountBuilder() {}
 	public AccountBuilder(String id) {
 		this.id = id;
 	}
 	public AccountBuilder add(double amount) {
 		this.amount += amount;
+		return this;
+	}
+	
+	public AccountBuilder setId(String id) {
+		this.id = id;
 		return this;
 	}
 	
