@@ -12,6 +12,12 @@ public class TimeItemBuilderTest {
 		builder.setHours(5.26);
 		TimeItem item = builder.toTimeItem();
 		assertEquals(5.5, item.getHours());
+		builder.setHours(5.25);
+		item = builder.toTimeItem();
+		assertEquals(5.5, item.getHours());
+		builder.setHours(5.1);
+		item = builder.toTimeItem();
+		assertEquals(5., item.getHours());
 	}
 
 }
