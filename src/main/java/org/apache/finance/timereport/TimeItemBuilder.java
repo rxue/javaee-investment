@@ -1,4 +1,4 @@
-package org.apache.timereport;
+package org.apache.finance.timereport;
 
 import java.util.function.DoubleUnaryOperator;
 

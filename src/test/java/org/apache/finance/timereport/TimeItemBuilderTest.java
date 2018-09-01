@@ -1,7 +1,9 @@
-package org.apache.timereport;
+package org.apache.finance.timereport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.apache.finance.timereport.TimeItem;
+import org.apache.finance.timereport.TimeItemBuilder;
 import org.junit.Test;
 
 public class TimeItemBuilderTest {
